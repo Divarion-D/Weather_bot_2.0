@@ -8,10 +8,10 @@ from tinydb import Query, TinyDB
 from Openweather import OWM
 from Settings import Settings
 
-users_db = TinyDB('users.json')
-channel_db = TinyDB('channel.json')
+users_db = TinyDB('db/users.json')
+channel_db = TinyDB('db/channel.json')
 setting = Settings()
-
+    
 bot = AsyncTeleBot(setting.TELEGRAM_BOT_TOKEN, parse_mode=None)
 owm = OWM(setting.WEATHER_API_KEY, setting.WEATHER_EXCLUDE,
           setting.WEATHER_UNITS, setting.WEATHER_LANG)
@@ -20,7 +20,6 @@ clients = dict()
 
 @bot.message_handler(commands=['start'])
 async def start_message(message):
-
     # add chat_id to user
     if not users_db.search(Query().chat_id == message.chat.id):
         users_db.insert({'chat_id': message.chat.id, 'city': '', 'country': '',
@@ -43,9 +42,7 @@ async def weather_message(message):
         markup = setting_keyboard(message.chat.id, 'cancel')
         await bot.send_message(message.chat.id, setting.COMMAND_WEATHER_SET_CITY, reply_markup=markup)
         return
-    await bot.send_message(message.chat.id, build_weather_data(city, country, 1))
-
-# get chat_id from replay_message
+    await bot.send_message(message.chat.id, owm.build_weather_data(city, country, 1))
 
 
 @bot.message_handler(commands=['settings'])
@@ -60,7 +57,6 @@ async def echo_all(message):
     if message.text.lower() == 'установить город':
         # Set city and country
         clients[message.chat.id] = {'action': 1, 'type': 0}
-
         markup = types.ReplyKeyboardMarkup(
             one_time_keyboard=True, resize_keyboard=True)
         markup.row('Отмена')
@@ -182,16 +178,6 @@ def validate_group(message):
         return False
 
 
-def get_weather_info(city, country):
-    city = city.strip()
-    country = country.strip()
-    country = country.upper()
-    data_city = owm.get_sity(city, country=country, matching='exact')
-
-    weather = owm.get_weather_sity_coord(data_city['lat'], data_city['lon'])
-    return weather
-
-
 def setting_keyboard(chat_id, kit):
     if kit == 'main':
         markup = types.ReplyKeyboardMarkup(
@@ -211,14 +197,6 @@ def setting_keyboard(chat_id, kit):
             one_time_keyboard=True, resize_keyboard=True)
         markup.row('Отмена')
         return markup
-
-
-def translate(text):
-    return setting.WEATHER_CLOUDS[text]
-
-
-def ucfirst(text):
-    return text[0].upper() + text[1:]
 
 
 def validate_time(time, type):
@@ -243,7 +221,7 @@ async def send_notification():
             curent_time = datetime.datetime.utcnow() + time_zone_offset
             curent_time = curent_time.strftime('%H:%M')
             if curent_time == user_time:
-                await bot.send_message(user['chat_id'], build_weather_data(user['city'], user['country'], 1))
+                await bot.send_message(user['chat_id'], owm.build_weather_data(user['city'], user['country'], 1))
         for channel in channel_db.search(Query().auto_notify == True):
             time_zone = channel['auto_notify_timezone']
             user_time = channel['auto_notify_time']
@@ -251,40 +229,10 @@ async def send_notification():
             curent_time = datetime.datetime.utcnow() + time_zone_offset
             curent_time = curent_time.strftime('%H:%M')
             if curent_time == user_time:
-                await bot.send_message(channel['channel_id'], build_weather_data(channel['city'], channel['country'], 1))
+                await bot.send_message(channel['channel_id'], owm.build_weather_data(channel['city'], channel['country'], 1))
 
         await asyncio.sleep(60)
 
-
-
-def build_weather_data(city, country, type):
-    weather_data = get_weather_info(city, country)
-    if type == 1:
-        data = 'Погода сейчас \n'
-        data += 'Температура: ' + \
-            str(weather_data['current']['temp']) + '°С \n'
-        data += 'Влажность: ' + \
-            str(weather_data['current']['humidity']) + '% \n'
-        data += 'Погода: ' + \
-            translate(weather_data['current']['weather'][0]['main']) + '\n'
-        data += 'Описание: ' + \
-            ucfirst(weather_data['current']['weather']
-                    [0]['description']) + '\n'
-        data += '\n'
-        data += 'Погода днем' + '\n'
-        data += 'Температура: ' + \
-            str(weather_data['daily'][0]['temp']['day']) + '°С \n'
-        data += 'Влажность: ' + \
-            str(weather_data['daily'][0]['humidity']) + '% \n'
-        data += 'Погода: ' + \
-            translate(weather_data['daily'][0]['weather'][0]['main']) + '\n'
-        data += 'Описание: ' + \
-            ucfirst(weather_data['daily'][0]['weather']
-                    [0]['description']) + '\n'
-        data += 'Вероятность осадков: ' + \
-            str(weather_data['daily'][0]['pop']*100) + '% \n'
-
-    return data
 
 async def main():
     task1 = asyncio.create_task(

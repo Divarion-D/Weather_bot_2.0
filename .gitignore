@@ -1,3 +1,3 @@
 __pycache__
-channel.json
-users.json
+db/channel.json
+db/users.json
