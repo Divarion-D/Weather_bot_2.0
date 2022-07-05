@@ -148,6 +148,8 @@ async def echo_all(message):
                 clients[message.chat.id]['type'] = 0
                 clients[message.chat.id]['channel_id'] = 0
                 await bot.send_message(message.chat.id, setting.COMMAND_WEATHER_SET_AUTO_NOTIFY_TIMEZONE_OK, reply_markup=types.ReplyKeyboardRemove())
+                await bot.send_message(message.chat.id, setting.SETTING_CHANNEL_OK)
+                
             else:
                 await bot.send_message(message.chat.id, setting.COMMAND_WEATHER_SET_AUTO_NOTIFY_TIMEZONE_ERROR)
     elif clients[message.chat.id]['action'] == 4:

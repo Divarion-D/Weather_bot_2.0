@@ -19,7 +19,7 @@ class Settings:
         'Clouds': 'Облачно'}
 
 
-    WELCOME_MESSAGE = 'Привет! Я бот для получения информации о погоде. Напишите мне название города и страну, и я покажу погоду в этом городе.'
+    WELCOME_MESSAGE = 'Привет! Я бот для получения информации о погоде. Напиши /settings для настройки приложения.'
 
     ABOUT_MESSAGE = 'Автор Бота: https://t.me/Divarion_D\n'
     ABOUT_MESSAGE += 'GitHub: https://github.com/Divarion-D\n'
@@ -46,6 +46,7 @@ class Settings:
     COMMAND_WEATHER_SET_GROUP_ADD += 'После чего перешлите мне сообщение из этой группы'
     COMMAND_WEATHER_SET_GROUP_OK = 'Я добавлен в группу'
     COMMAND_WEATHER_SET_GROUP_ERROR = 'Не удалось добавить меня в группу'
+    SETTING_CHANNEL_OK = 'Бот в канале настроен' 
 
     COMMAND_WEATHER_SET_CITY_OK = 'Город изменен'
     

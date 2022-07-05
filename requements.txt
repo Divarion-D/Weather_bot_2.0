@@ -2,3 +2,4 @@ pyTelegramBotAPI
 pyowm
 asyncio
 matplotlib
+tinydb
