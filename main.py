@@ -217,20 +217,20 @@ async def send_notification():
     # Get all users
     while True:
         for user in users_db.search(Query().auto_notify == True):
-            time_zone = user['auto_notify_timezone']
+            user_time_zone = user['auto_notify_timezone']
             user_time = user['auto_notify_time']
-            time_zone_offset = datetime.timedelta(hours=int(time_zone.split(':')[0]), minutes=int(time_zone.split(':')[1]))
+            time_zone_offset = datetime.timedelta(hours=int(user_time_zone.split(':')[0]), minutes=int(user_time_zone.split(':')[1]))
             curent_time = datetime.datetime.utcnow() + time_zone_offset
             curent_time = curent_time.strftime('%H:%M')
             if curent_time == user_time:
                 await bot.send_message(user['chat_id'], owm.build_weather_data(user['city'], user['country'], 1))
         for channel in channel_db.search(Query().auto_notify == True):
-            time_zone = channel['auto_notify_timezone']
-            user_time = channel['auto_notify_time']
-            time_zone_offset = datetime.timedelta(hours=int(time_zone.split(':')[0]), minutes=int(time_zone.split(':')[1]))
+            channel_time_zone = channel['auto_notify_timezone']
+            channel_time = channel['auto_notify_time']
+            time_zone_offset = datetime.timedelta(hours=int(channel_time_zone.split(':')[0]), minutes=int(channel_time_zone.split(':')[1]))
             curent_time = datetime.datetime.utcnow() + time_zone_offset
             curent_time = curent_time.strftime('%H:%M')
-            if curent_time == user_time:
+            if curent_time == channel_time:
                 await bot.send_message(channel['channel_id'], owm.build_weather_data(channel['city'], channel['country'], 1))
 
         await asyncio.sleep(60)

@@ -74,8 +74,8 @@ class OWM:
             data += 'Влажность: ' + \
                 str(weather_data['current']['humidity']) + '% \n'
             data += 'Погода: ' + \
-                self.translate(weather_data['current']
-                               ['weather'][0]['main']) + '\n'
+                self.weather_translate(weather_data['current']
+                                       ['weather'][0]['main']) + '\n'
             data += 'Описание: ' + \
                 self.ucfirst(weather_data['current']['weather']
                              [0]['description']) + '\n'
@@ -86,8 +86,8 @@ class OWM:
             data += 'Влажность: ' + \
                 str(weather_data['daily'][0]['humidity']) + '% \n'
             data += 'Погода: ' + \
-                self.translate(weather_data['daily']
-                               [0]['weather'][0]['main']) + '\n'
+                self.weather_translate(weather_data['daily']
+                                       [0]['weather'][0]['main']) + '\n'
             data += 'Описание: ' + \
                 self.ucfirst(weather_data['daily'][0]['weather']
                              [0]['description']) + '\n'
@@ -96,13 +96,13 @@ class OWM:
 
         return data
 
-    def translate(text):
+    def weather_translate(self, text):
         ''' 
         Переводит название погоды на другой язык
         '''
         return setting.WEATHER_CLOUDS[text]
 
-    def ucfirst(text):
+    def ucfirst(self, text):
         '''
         Переводит первую букву в верхний регистр
         '''
