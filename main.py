@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import re
+import os
 
 from telebot.async_telebot import AsyncTeleBot, types
 from tinydb import Query, TinyDB
@@ -8,6 +9,10 @@ from tinydb import Query, TinyDB
 from Openweather import OWM
 from Settings import Settings
 from Language import Language
+
+#check folder db
+if not os.path.exists('db'):
+    os.makedirs('db')
 
 users_db = TinyDB('db/users.json')
 channel_db = TinyDB('db/channel.json')
