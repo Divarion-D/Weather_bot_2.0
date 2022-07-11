@@ -41,6 +41,8 @@ class Language:
     ADD_CHANNEL_OK = 'Я добавлен в канал'
     ADD_CHANNEL_ERROR = 'Не удалось добавить меня в канал'
 
+    SEND_TEST_MESSAGE = 'Погода была отправлена в канал'
+    
     MY_CHANNEL = 'Выберете один из каналов для настройки: '
 
     HELP_MESSAGE = 'Помощь:\n'

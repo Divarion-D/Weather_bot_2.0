@@ -1,9 +1,10 @@
 import requests
 
 from Settings import Settings
+from Language import Language
 
 setting = Settings()
-
+language = Language()
 
 class OWM:
     def __init__(self, api_key, exclude, units, lang):
@@ -100,7 +101,7 @@ class OWM:
         ''' 
         Переводит название погоды на другой язык
         '''
-        return setting.WEATHER_CLOUDS[text]
+        return language.CLOUDS[text]
 
     def ucfirst(self, text):
         '''

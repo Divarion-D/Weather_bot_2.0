@@ -108,6 +108,14 @@ async def my_channel(message):
     markup = setting_keyboard(message.chat.id, 'my_channel')
     await bot.send_message(message.chat.id, language.MY_CHANNEL, reply_markup=markup)
 
+@bot.message_handler(regexp='отправить тестовое сообщение')
+async def send_test_message(message):
+    channel = channel_db.get(Query().channel_id == clients[message.chat.id]['channel_id'])
+    clients[message.chat.id]['action'] = 0
+    await bot.send_message(channel['channel_id'], owm.build_weather_data(channel['city'], channel['country'], 1))
+    markup = setting_keyboard(message.chat.id, 'setup_channel')
+    await bot.send_message(message.chat.id, language.SEND_TEST_MESSAGE, reply_markup=markup)
+
 
 @bot.message_handler(regexp='включить автосводку')
 async def enable_auto_notify(message):
@@ -249,6 +257,7 @@ def setting_keyboard(chat_id, kit):
         markup.row('Установить город')
         markup.row('Настроить время автосводки')
         markup.row('Настроить часовой пояс')
+        markup.row('Отправить тестовое сообщение')
         markup.row('Отмена')
     elif kit == 'setup_auto_notify':
         markup = types.ReplyKeyboardMarkup(
@@ -291,7 +300,7 @@ async def send_notification():
             curent_time = datetime.datetime.utcnow() + time_zone_offset
             curent_time = curent_time.strftime('%H:%M')
             if curent_time == user_time:
-                await bot.send_message(user['chat_id'], owm.build_data(user['city'], user['country'], 1))
+                await bot.send_message(user['chat_id'], owm.build_weather_data(user['city'], user['country'], 1))
         for channel in channel_db.search(Query().auto_notify == True):
             channel_time_zone = channel['auto_notify_timezone']
             channel_time = channel['auto_notify_time']
@@ -300,7 +309,7 @@ async def send_notification():
             curent_time = datetime.datetime.utcnow() + time_zone_offset
             curent_time = curent_time.strftime('%H:%M')
             if curent_time == channel_time:
-                await bot.send_message(channel['channel_id'], owm.build_data(channel['city'], channel['country'], 1))
+                await bot.send_message(channel['channel_id'], owm.build_weather_data(channel['city'], channel['country'], 1))
 
         await asyncio.sleep(60)
 
