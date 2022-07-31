@@ -23,7 +23,7 @@ bot = AsyncTeleBot(setting.TELEGRAM_BOT_TOKEN, parse_mode=None)
 owm = OWM(setting.WEATHER_API_KEY, setting.WEATHER_EXCLUDE,
           setting.WEATHER_UNITS, setting.WEATHER_LANG)
 
-clients = dict()
+clients = {}
 
 
 @bot.message_handler(commands=['start'])
@@ -155,13 +155,12 @@ async def echo_all(message):
                             Query().chat_id == message.chat.id)
             clients[message.chat.id]['action'] = 0
             markup = setting_keyboard(message.chat.id, 'main')
-            await bot.send_message(message.chat.id, language.SET_CITY_OK, reply_markup=markup)
         else:
             channel_db.update({'city': data[0], 'country': data[1]},
                               Query().channel_id == clients[message.chat.id]['channel_id'])
             clients[message.chat.id]['action'] = 0
             markup = setting_keyboard(message.chat.id, 'setup_channel')
-            await bot.send_message(message.chat.id, language.SET_CITY_OK, reply_markup=markup)
+        await bot.send_message(message.chat.id, language.SET_CITY_OK, reply_markup=markup)
     elif clients[message.chat.id]['action'] == 2:
         # Set time
         if clients[message.chat.id]['type'] == 0:
@@ -173,15 +172,14 @@ async def echo_all(message):
                 await bot.send_message(message.chat.id, language.SET_AUTO_NOTIFY_TIME_OK, reply_markup=markup)
             else:
                 await bot.send_message(message.chat.id, language.SET_AUTO_NOTIFY_TIME_ERROR)
+        elif validate_time(message.text, 'time'):
+            channel_db.update({'auto_notify_time': message.text},
+                              Query().channel_id == clients[message.chat.id]['channel_id'])
+            clients[message.chat.id]['action'] = 0
+            markup = setting_keyboard(message.chat.id, 'setup_channel')
+            await bot.send_message(message.chat.id, language.SET_AUTO_NOTIFY_TIME_OK, reply_markup=markup)
         else:
-            if validate_time(message.text, 'time'):
-                channel_db.update({'auto_notify_time': message.text},
-                                  Query().channel_id == clients[message.chat.id]['channel_id'])
-                clients[message.chat.id]['action'] = 0
-                markup = setting_keyboard(message.chat.id, 'setup_channel')
-                await bot.send_message(message.chat.id, language.SET_AUTO_NOTIFY_TIME_OK, reply_markup=markup)
-            else:
-                await bot.send_message(message.chat.id, language.SET_AUTO_NOTIFY_TIME_ERROR)
+            await bot.send_message(message.chat.id, language.SET_AUTO_NOTIFY_TIME_ERROR)
     elif clients[message.chat.id]['action'] == 3:
         # Set timezone
         if clients[message.chat.id]['type'] == 0:
@@ -193,15 +191,14 @@ async def echo_all(message):
                 await bot.send_message(message.chat.id, language.SET_TIMEZONE_OK, reply_markup=markup)
             else:
                 await bot.send_message(message.chat.id, language.SET_TIMEZONE_ERROR)
+        elif validate_time(message.text, 'timezone'):
+            channel_db.update({'auto_notify_timezone': message.text},
+                              Query().channel_id == clients[message.chat.id]['channel_id'])
+            clients[message.chat.id]['action'] = 0
+            markup = setting_keyboard(message.chat.id, 'setup_channel')
+            await bot.send_message(message.chat.id, language.SET_TIMEZONE_OK, reply_markup=markup)
         else:
-            if validate_time(message.text, 'timezone'):
-                channel_db.update({'auto_notify_timezone': message.text},
-                                  Query().channel_id == clients[message.chat.id]['channel_id'])
-                clients[message.chat.id]['action'] = 0
-                markup = setting_keyboard(message.chat.id, 'setup_channel')
-                await bot.send_message(message.chat.id, language.SET_TIMEZONE_OK, reply_markup=markup)
-            else:
-                await bot.send_message(message.chat.id, language.SET_TIMEZONE_ERROR)
+            await bot.send_message(message.chat.id, language.SET_TIMEZONE_ERROR)
     elif clients[message.chat.id]['action'] == 4:
         # Add group
         if validate_group(message):
@@ -222,14 +219,13 @@ async def echo_all(message):
 
 def validate_group(message):
     data = message.forward_from_chat
-    if data.type == 'channel':
-        # add group to channel
-        if not channel_db.search(Query().channel_id == message.chat.id):
-            channel_db.insert(
-                {'channel_id': data.id, 'name': data.title, 'admin': message.chat.id, 'city': '', 'country': '', 'auto_notify': True, 'auto_notify_time': '00:00', 'auto_notify_timezone': '+03:00'})
-        return True
-    else:
+    if data.type != 'channel':
         return False
+    # add group to channel
+    if not channel_db.search(Query().channel_id == message.chat.id):
+        channel_db.insert(
+            {'channel_id': data.id, 'name': data.title, 'admin': message.chat.id, 'city': '', 'country': '', 'auto_notify': True, 'auto_notify_time': '00:00', 'auto_notify_timezone': '+03:00'})
+    return True
 
 
 def setting_keyboard(chat_id, kit):
@@ -279,11 +275,9 @@ def setting_keyboard(chat_id, kit):
 
 def validate_time(time, type):
     if type == 'time':
-        regex = r"^([01][0-9]|2[0-3]):([0-5][0-9])$"
-        return re.match(regex, time)
+        return re.match(r"^([01][0-9]|2[0-3]):([0-5][0-9])$", time)
     elif type == 'timezone':
-        regex = r"^([+-][0-9]{2}):([0-9]{2})$"
-        return re.match(regex, time)
+        return re.match(r"^([+-][0-9]{2}):([0-9]{2})$", time)
 
 
 async def send_notification():
