@@ -1,0 +1,28 @@
+{
+    "name": "Weather_Bot",
+    "description": "Weather Bot",
+    "website": "https://github.com/Divarion-D",
+    "repository": "https://github.com/Divarion-D/Weather_bot_2.0",
+    "env": {
+        "TG_BOT_TOKEN": {
+            "description": "Your bot token, as a string.",
+            "value": ""
+        },
+        "OW_TOKEN": {
+            "description": "Get this value from https://openweathermap.org/api",
+            "value": ""
+        }
+    },
+    "addons": [],
+    "buildpacks": [
+        {
+            "url": "heroku/python"
+        }
+    ],
+    "formation": {
+        "worker": {
+            "quantity": 1,
+            "size": "free"
+        }
+    }
+}
