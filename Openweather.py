@@ -18,39 +18,41 @@ class OWM:
         '''
         Получает данные о городе из базы данных по его названию
         '''
-        url = self.base_url + 'find?q=' + city + ',' + country + '&type=' + matching
+        url = f'{self.base_url}find?q={city},{country}&type={matching}'
         response = requests.get(
             url, params={'appid': self.api_key}).json()['list'][0]
 
-        data = {
+        return {
             'id': response['id'],
             'city': response['name'],
             'country': response['sys']['country'],
             'lat': response['coord']['lat'],
             'lon': response['coord']['lon'],
         }
-        return data
 
     def get_weather_sity_id(self, city_id):
-        url = self.base_url + 'weather?id=' + str(city_id)
-        response = requests.get(url, params={'appid': self.api_key}).json()
-        return response
+        url = f'{self.base_url}weather?id={str(city_id)}'
+        return requests.get(url, params={'appid': self.api_key}).json()
 
     def get_weather_sity_name(self, city, country):
-        url = self.base_url + 'weather?q=' + city + ',' + country
-        response = requests.get(url, params={'appid': self.api_key}).json()
-        return response
+        url = f'{self.base_url}weather?q={city},{country}'
+        return requests.get(url, params={'appid': self.api_key}).json()
 
     def get_weather_sity_coord(self, lat, lon):
         '''
         Получает данные о погоде по координатам
         '''
-        parameter = '&units=' + self.units + '&lang=' + \
-            self.lang + '&exclude=' + self.exclude
-        url = self.base_url + 'onecall?lat=' + \
-            str(lat) + '&lon=' + str(lon) + parameter
-        response = requests.get(url, params={'appid': self.api_key}).json()
-        return response
+        parameter = (
+            (f'&units={self.units}&lang=' + self.lang) + '&exclude='
+        ) + self.exclude
+
+        url = (
+            ((f'{self.base_url}onecall?lat=' + str(lat)) + '&lon=')
+            + str(lon)
+            + parameter
+        )
+
+        return requests.get(url, params={'appid': self.api_key}).json()
 
     def get_weather_info(self, city, country):
         '''
@@ -59,9 +61,7 @@ class OWM:
         city = city.strip()
         country = country.strip().upper()
         data_city = self.get_sity(city, country=country, matching='exact')
-        weather = self.get_weather_sity_coord(
-            data_city['lat'], data_city['lon'])
-        return weather
+        return self.get_weather_sity_coord(data_city['lat'], data_city['lon'])
 
     def build_weather_data(self, city, country, type):
         '''
