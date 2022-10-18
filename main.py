@@ -50,7 +50,7 @@ async def message(message):
         markup = setting_keyboard(message.chat.id, 'cancel')
         await bot.send_message(message.chat.id, language.SET_CITY, reply_markup=markup)
         return
-    await bot.send_message(message.chat.id, owm.build_data(city, country, 1))
+    await bot.send_message(message.chat.id, owm.build_weather_data(city, country, 1))
 
 
 @bot.message_handler(commands=['settings'])
@@ -131,7 +131,7 @@ async def disable_auto_notify(message):
     await bot.send_message(message.chat.id, language.AUTO_NOTIFY_OFF, reply_markup=markup)
 
 
-@bot.message_handler(regexp='Настроить автосводку')
+@bot.message_handler(regexp='настроить автосводку')
 async def set_auto_notify(message):
     markup = setting_keyboard(message.chat.id, 'setup_auto_notify')
     await bot.send_message(message.chat.id, language.SETTING, reply_markup=markup)
