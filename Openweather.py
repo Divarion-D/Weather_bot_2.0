@@ -42,15 +42,9 @@ class OWM:
         '''
         Получает данные о погоде по координатам
         '''
-        parameter = (
-            (f'&units={self.units}&lang=' + self.lang) + '&exclude='
-        ) + self.exclude
+        parameter = f'&units={self.units}&lang={self.lang}&exclude={self.exclude}'
 
-        url = (
-            ((f'{self.base_url}onecall?lat=' + str(lat)) + '&lon=')
-            + str(lon)
-            + parameter
-        )
+        url = f'{self.base_url}onecall?lat={str(lat)}&lon={str(lon)}{parameter}'
 
         return requests.get(url, params={'appid': self.api_key}).json()
 
